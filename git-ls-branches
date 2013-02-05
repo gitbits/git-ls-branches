@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# git-ls-branch - lists branches sorted by date
+# git-ls-branches - lists branches sorted by date
 #
 # Copyright (c) 2013 Akinori MUSHA
 #
@@ -30,7 +30,7 @@
 
 usage () {
     cat <<EOF >&2
-usage: git ls-branch [options]
+usage: git ls-branches [options]
 
     -v, --verbose         be verbose
     --color               turn on color even if stdout is not a tty
@@ -138,7 +138,7 @@ main () {
         lbranchf="$rbranchf"
     fi
 
-    finfo="$(mktemp /tmp/git-ls-branch.XXXXXX)"
+    finfo="$(mktemp /tmp/git-ls-branches.XXXXXX)"
 
     git branch --verbose --no-abbrev $args | while IFS='
 ' read -r line; do

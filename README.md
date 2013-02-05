@@ -1,15 +1,15 @@
-git-ls-branch
-=============
+git-ls-branches
+===============
 
 Synopsis
 --------
 
-* git-ls-branch - lists branches sorted by date
+* git-ls-branches - lists branches sorted by date
 
 Usage
 -----
 
-    git ls-branch [options]
+    git ls-branches [options]
 
         -v, --verbose         be verbose
         --color               turn on color even if stdout is not a tty
@@ -24,14 +24,14 @@ Usage
 Example
 -------
 
-    % git ls-branch
+    % git ls-branches
     * master                                         (2 weeks ago)
       m17n                                           (1 year, 6 months ago)
       1.4                                            (1 year, 7 months ago)
       encoding_fix                                   (1 year, 7 months ago)
       http_equiv_headers                             (2 years, 1 month ago)
 
-    % git ls-branch -ti --verbose
+    % git ls-branches -ti --verbose
     * master                                         (2013-01-19 22:31:25 -0500) 9af8b10 add more changes to the changelog. 
       m17n                                           (2011-08-18 21:58:07 +0900) 11df7c9 Add a failing test that should be passing. 
       1.4                                            (2011-07-01 00:53:44 -0400) 66b46cf Release prep: bumping version to 1.4.7 and updating the changelogs. 
@@ -44,8 +44,8 @@ pagerized just like other git commands.
 Description
 -----------
 
-`git-ls-branch(1)` requires `git-pager(1)` for invoking a pager.  Get
-it from <https://github.com/gitbits/git-info>.
+`git-ls-branches(1)` requires `git-pager(1)` for invoking a pager.
+Get it from <https://github.com/gitbits/git-info>.
 
 License
 -------
