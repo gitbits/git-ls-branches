@@ -1,0 +1,192 @@
+#!/bin/sh
+#
+# git-ls-branch - lists branches sorted by date
+#
+# Copyright (c) 2013 Akinori MUSHA
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+
+usage () {
+    cat <<EOF >&2
+usage: git ls-branch [options]
+
+    -v, --verbose         be verbose
+    --color               turn on color even if stdout is not a tty
+    --no-pager            do not pipe output into a pager
+
+    -a, --all             list both remote-tracking and local branches
+    -r, --remotes         list remote-tracking branches
+    --no-merged=<commit>  print only not merged branches
+    --merged=<commit>     print only merged branches
+    -t[dDirt]             specify time format (cf. %c[dDirt])
+EOF
+}
+
+main () {
+    local opt OPTIND=1
+    local args color no_pager opt_remote verbose
+    local timef=%cr ptimef cbranchf lbranchf rbranchf
+    local finfo
+
+    while getopts ahrt:v-: opt; do
+        case "$opt" in
+            a)
+                args="$args -$opt"
+                ;;
+            r)
+                opt_remote=t
+                args="$args -$opt"
+                ;;
+            v)
+                verbose=t
+                ;;
+            t)
+                case "$OPTARG" in
+                    [dDirt])
+                        timef="%c$OPTARG"
+                        ;;
+                    *)
+                        echo "$0: unknown time format: $OPTARG" >&2
+                        exit 129
+                        ;;
+                esac
+                ;;
+            h)
+                usage
+                exit
+                ;;
+            -)
+                case "$OPTARG" in
+                    all)
+                        args="$args --$OPTARG"
+                        ;;
+                    color)
+                        color=true
+                        ;;
+                    no-pager)
+                        no_pager=t
+                        ;;
+                    remote)
+                        opt_remote=t
+                        args="$args --$OPTARG"
+                        ;;
+                    verbose)
+                        verbose=t
+                        ;;
+                    merged\=*|no-merged\=*)
+                        args="$args --$OPTARG"
+                        ;;
+                    help)
+                        usage
+                        exit
+                        ;;
+                    *)
+                        echo "$0: unknown option: -$OPTARG" >&2
+                        exit 129
+                        ;;
+                esac
+                ;;
+            *)
+                usage
+                exit 129
+                ;;
+        esac
+    done
+
+    if [ -z "$no_pager" -a -t 1 ]; then
+        main --color "$@" | git-pager
+        exit
+    fi
+
+    shift "$((OPTIND-1))"
+
+    if git config --get-colorbool=color.branch $color >/dev/null; then
+        ptimef="%Cblue($timef)%Creset"
+        cbranchf="$(git config --get-color=color.branch.current green)%s\033[m"
+        lbranchf="$(git config --get-color=color.branch.local normal)%s\033[m"
+        rbranchf="$(git config --get-color=color.branch.remote red)%s\033[m"
+    else
+        ptimef="($timef)"
+        cbranchf="%s"
+        lbranchf="%s"
+        rbranchf="%s"
+    fi
+
+    if [ -n "$opt_remote" ]; then
+        lbranchf="$rbranchf"
+    fi
+
+    finfo="$(mktemp /tmp/git-ls-branch.XXXXXX)"
+
+    git branch --verbose --no-abbrev $args | while IFS='
+' read -r line; do
+        sign="${line%% *}"
+        echo "${line#??}" | {
+            IFS=' ' read -r branch hash rest
+            if [ "$hash" = '->' ]; then
+                hash="$(git show-ref --dereference "$branch")"
+                hash="${hash%% *}"
+                link="$rest"
+                rest=
+            else
+                link=
+                if [ -n "$verbose" ]; then
+                    rest="${hash%${hash#???????}} $rest"
+                else
+                    rest=
+                fi
+            fi
+            echo "$hash:$sign:$branch:$link:$rest" >> "$finfo"
+            printf "$branch\000"
+        }
+    done | xargs -0 git show --quiet --format="%H %ct $ptimef" | {
+        while IFS=' ' read -r hash time ptime; do
+            eval "
+time_$hash=\"\$time\"
+ptime_$hash=\"\$ptime\"
+"
+        done
+
+        while IFS=: read hash sign branch link rest; do
+            eval "
+time=\"\$time_$hash\"
+ptime=\"\$ptime_$hash\"
+"
+            printf '%s:%s:%-48s:%s\n' \
+                $time "$sign" "$branch:${link:+ -> $link}" "$ptime${rest:+ $rest}"
+        done < "$finfo"
+
+        rm -f "$finfo"
+    } | sort -nr | while IFS=: read -r time sign branch info rest; do
+        case "$sign$branch" in
+            '*'*)      branchf="$cbranchf" ;;
+            remotes/*) branchf="$rbranchf" ;;
+            *)         branchf="$lbranchf" ;;
+        esac
+        printf "%-2s$branchf %s\n" "$sign" "$branch$info$rest"
+    done
+}
+
+main "$@"
