@@ -161,7 +161,7 @@ main () {
             echo "$hash:$sign:$branch:$link:$rest" >> "$finfo"
             printf "$branch\000"
         }
-    done | xargs -0 git show --quiet --format="%H %ct $ptimef" | {
+    done | xargs -0 git show -s --format="%H %ct $ptimef" | {
         while IFS=' ' read -r hash time ptime; do
             eval "
 time_$hash=\"\$time\"
