@@ -145,6 +145,12 @@ main () {
         sign="${line%% *}"
         echo "${line#??}" | {
             IFS=' ' read -r branch hash rest
+            if [ "$branch $hash" = '(detached from' ]; then
+                branch="(${rest%%" "*}"
+                rest="${rest#*" "}"
+                hash="${rest%%" "*}"
+                rest="${rest#*" "}"
+            fi
             if [ "$hash" = '->' ]; then
                 hash="$(git show-ref --dereference "$branch")"
                 hash="${hash%% *}"
@@ -159,7 +165,7 @@ main () {
                 fi
             fi
             echo "$hash:$sign:$branch:$link:$rest" >> "$finfo"
-            printf "$branch\000"
+            printf "$hash\000"
         }
     done | xargs -0 git show -s --format="%H %ct $ptimef" | {
         while IFS=' ' read -r hash time ptime; do
