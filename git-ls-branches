@@ -122,11 +122,11 @@ main () {
 
     shift "$((OPTIND-1))"
 
-    if git config --get-colorbool=color.branch $color >/dev/null; then
+    if git config --get-colorbool color.branch $color >/dev/null; then
         ptimef="%Cblue($timef)%Creset"
-        cbranchf="$(git config --get-color=color.branch.current green)%s\033[m"
-        lbranchf="$(git config --get-color=color.branch.local normal)%s\033[m"
-        rbranchf="$(git config --get-color=color.branch.remote red)%s\033[m"
+        cbranchf="$(git config --get-color color.branch.current green)%s\033[m"
+        lbranchf="$(git config --get-color color.branch.local normal)%s\033[m"
+        rbranchf="$(git config --get-color color.branch.remote red)%s\033[m"
     else
         ptimef="($timef)"
         cbranchf="%s"
