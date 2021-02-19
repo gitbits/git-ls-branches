@@ -2,7 +2,7 @@
 #
 # git-ls-branches - lists branches sorted by date
 #
-# Copyright (c) 2013 Akinori MUSHA
+# Copyright (c) 2013-2021 Akinori MUSHA
 #
 # All rights reserved.
 #
@@ -34,7 +34,6 @@ usage: git ls-branches [options]
 
     -v, --verbose         be verbose
     --color               turn on color even if stdout is not a tty
-    --no-pager            do not pipe output into a pager
 
     -a, --all             list both remote-tracking and local branches
     -r, --remotes         list remote-tracking branches
@@ -46,7 +45,7 @@ EOF
 
 main () {
     local opt OPTIND=1
-    local args color no_pager opt_remote verbose
+    local args color opt_remote verbose
     local timef=%cr ptimef cbranchf lbranchf rbranchf
     local finfo
 
@@ -85,9 +84,6 @@ main () {
                     color)
                         color=true
                         ;;
-                    no-pager)
-                        no_pager=t
-                        ;;
                     remote)
                         opt_remote=t
                         args="$args --$OPTARG"
@@ -115,12 +111,11 @@ main () {
         esac
     done
 
-    if [ -z "$no_pager" -a -t 1 ]; then
-        main --color "$@" | git-pager
-        exit
-    fi
-
     shift "$((OPTIND-1))"
+
+    if [ -z "$color" -a -t 1 ]; then
+        color=true
+    fi
 
     if git config --get-colorbool color.branch $color >/dev/null; then
         ptimef="%Cblue($timef)%Creset"
