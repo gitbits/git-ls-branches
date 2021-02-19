@@ -135,7 +135,7 @@ main () {
 
     finfo="$(mktemp /tmp/git-ls-branches.XXXXXX)"
 
-    git branch --verbose --no-abbrev $args | while IFS='
+    git branch --verbose --no-abbrev --sort=-committerdate $args | while IFS='
 ' read -r line; do
         sign="${line%% *}"
         echo "${line#??}" | {
@@ -164,25 +164,23 @@ main () {
             echo "$hash:$sign:$branch:$link:$rest" >> "$finfo"
             printf "$hash\000"
         }
-    done | xargs -0 git show -s --format="%H %ct $ptimef" | {
-        while IFS=' ' read -r hash time ptime; do
+    done | xargs -0 git show -s --format="%H $ptimef" | tee a | {
+        while IFS=' ' read -r hash ptime; do
             eval "
-time_$hash=\"\$time\"
 ptime_$hash=\"\$ptime\"
 "
         done
 
         while IFS=: read hash sign branch link rest; do
             eval "
-time=\"\$time_$hash\"
 ptime=\"\$ptime_$hash\"
 "
-            printf '%s:%s:%-48s:%s\n' \
-                $time "$sign" "$branch:${link:+ -> $link}" "$ptime${rest:+ $rest}"
+            printf '%s:%-48s:%s\n' \
+                "$sign" "$branch:${link:+ -> $link}" "$ptime${rest:+ $rest}"
         done < "$finfo"
 
         rm -f "$finfo"
-    } | sort -nr | while IFS=: read -r time sign branch info rest; do
+    } | while IFS=: read -r sign branch info rest; do
         case "$sign$branch" in
             '*'*)      branchf="$cbranchf" ;;
             remotes/*) branchf="$rbranchf" ;;
