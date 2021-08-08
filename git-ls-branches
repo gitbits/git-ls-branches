@@ -135,7 +135,7 @@ main () {
 
     finfo="$(mktemp /tmp/git-ls-branches.XXXXXX)"
 
-    git branch --verbose --no-abbrev --sort=-committerdate $args | while IFS='
+    git branch --verbose --no-color --no-abbrev --sort=-committerdate $args | while IFS='
 ' read -r line; do
         sign="${line%% *}"
         echo "${line#??}" | {
