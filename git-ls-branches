@@ -138,7 +138,7 @@ main () {
     git branch --verbose --no-color --no-abbrev --sort=-committerdate $args | while IFS='
 ' read -r line; do
         sign="${line%% *}"
-        echo "${line#??}" | {
+        printf "%s\n" "${line#??}" | {
             IFS=' ' read -r branch hash rest
             case "$branch $hash $rest" in
                 '('*') '*' '*)
@@ -162,7 +162,7 @@ main () {
                 fi
             fi
             echo "$hash:$sign:$branch:$link:$rest" >> "$finfo"
-            printf "$hash\000"
+            printf "%s\000" "$hash"
         }
     done | xargs -0 git show -s --format="%H $ptimef" | tee a | {
         while IFS=' ' read -r hash ptime; do
