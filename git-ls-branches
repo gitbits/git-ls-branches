@@ -175,7 +175,7 @@ ptime_$hash=\"\$ptime\"
             eval "
 ptime=\"\$ptime_$hash\"
 "
-            printf '%s:%-48s:%s\n' \
+            printf '%s:%-46s:%s\n' \
                 "$sign" "$branch:${link:+ -> $link}" "$ptime${rest:+ $rest}"
         done < "$finfo"
 
@@ -186,7 +186,7 @@ ptime=\"\$ptime_$hash\"
             remotes/*) branchf="$rbranchf" ;;
             *)         branchf="$lbranchf" ;;
         esac
-        printf "%-2s$branchf %s\n" "$sign" "$branch$info$rest"
+        printf "%-2s$branchf %s\n" "$sign" "$branch $info$rest"
     done
 }
 
