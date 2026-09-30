@@ -6,6 +6,15 @@ Synopsis
 
 * git-ls-branches - lists branches sorted by date
 
+Installation
+------------
+
+Install with [mise](https://mise.jdx.dev/):
+
+```sh
+mise use -g github:gitbits/git-ls-branches@latest
+```
+
 Usage
 -----
 
@@ -13,7 +22,6 @@ Usage
 
         -v, --verbose         be verbose
         --color               turn on color even if stdout is not a tty
-        --no-pager            do not pipe output into a pager
 
         -a, --all             list both remote-tracking and local branches
         -r, --remotes         list remote-tracking branches
@@ -32,11 +40,11 @@ Example
       http_equiv_headers                             (2 years, 1 month ago)
 
     % git ls-branches -ti --verbose
-    * master                                         (2013-01-19 22:31:25 -0500) 9af8b10 add more changes to the changelog. 
-      m17n                                           (2011-08-18 21:58:07 +0900) 11df7c9 Add a failing test that should be passing. 
-      1.4                                            (2011-07-01 00:53:44 -0400) 66b46cf Release prep: bumping version to 1.4.7 and updating the changelogs. 
-      encoding_fix                                   (2011-06-30 12:09:51 +0900) db14750 Add support for <meta charset="..">. 
-      http_equiv_headers                             (2011-01-16 23:46:27 +0900) f4cfa15 Add HTML#http_equiv_headers. 
+    * master                                         (2013-01-19 22:31:25 -0500) 9af8b10 add more changes to the changelog.
+      m17n                                           (2011-08-18 21:58:07 +0900) 11df7c9 Add a failing test that should be passing.
+      1.4                                            (2011-07-01 00:53:44 -0400) 66b46cf Release prep: bumping version to 1.4.7 and updating the changelogs.
+      encoding_fix                                   (2011-06-30 12:09:51 +0900) db14750 Add support for <meta charset="..">.
+      http_equiv_headers                             (2011-01-16 23:46:27 +0900) f4cfa15 Add HTML#http_equiv_headers.
 
 Actual output will be nicely colored, and also automatically
 pagerized just like other git commands.
@@ -44,8 +52,7 @@ pagerized just like other git commands.
 Description
 -----------
 
-`git-ls-branches(1)` requires `git-pager(1)` for invoking a pager.
-Get it from <https://github.com/gitbits/git-info>.
+Requires Git and a POSIX shell.  Pagination is handled by Git.
 
 License
 -------
